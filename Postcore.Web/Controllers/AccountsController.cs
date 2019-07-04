@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Postcore.Web.Core.WebModels.Accounts;
 
-namespace Postcore.Web.Controllers.Accounts
+namespace Postcore.Web.Controllers
 {
     public class AccountsController : Controller
     {
