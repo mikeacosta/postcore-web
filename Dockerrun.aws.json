@@ -1,0 +1,17 @@
+{
+    "AWSEBDockerrunVersion": "1",
+    "Image": {
+      "Name": "489967615225.dkr.ecr.us-west-2.amazonaws.com/postcore:latest",
+      "Update": "true"
+    },
+    "Ports": [
+      {
+        "ContainerPort": "5000"
+      }
+    ],
+    "Volumes": [
+      {
+        "ContainerDirectory": "/app"
+      }
+    ]
+  }
