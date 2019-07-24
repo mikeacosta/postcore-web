@@ -1,11 +1,12 @@
-﻿@model Postcore.Web.Core.WebModels.Accounts.LoginModel;
+﻿@{
+    ViewData["Title"] = "Sign in";
+}
+
+@model Postcore.Web.Core.WebModels.Accounts.LoginModel;
 
 <div class="row">
-    <div class="col-md-7">
-        <h5 class="alert alert-info">
-            <img src="http://www.icon100.com/up/2625/128/login.png" style="width: 32px;" />
-            Login using your email address and password
-        </h5>
+    <div class="col-md-5">
+        <h3 class="mt-5">Sign in</h3>
         <form method="post" asp-controller="Accounts" asp-action="Login">
             <div class="form-group">
                 <label asp-for="Email"></label>
@@ -26,10 +27,10 @@
                 </div>
             </div>
 
-            <button type="submit">Login</button>
-            <div class="alert alert-info mt-5">
-                Not a member yet? <a asp-action="Signup" asp-controller="Accounts" class="btn">Click here to Sign Up!</a>
-            </div>
+            <button type="submit" class="btn btn-primary">Sign in</button>
+            <p class="mt-4">
+                <a asp-action="Signup" asp-controller="Accounts">Create an account</a>
+            </p>
         </form>
     </div>
 </div>

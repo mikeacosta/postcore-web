@@ -77,9 +77,7 @@ namespace Postcore.Web.Controllers
             var createdUser = await _userManager.CreateAsync(user, model.Password).ConfigureAwait(false);
 
             if (createdUser.Succeeded)
-            {
-                RedirectToAction("Confirm");
-            }
+                return RedirectToAction("Confirm");
 
             return View();
         }
