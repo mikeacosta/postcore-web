@@ -21,8 +21,9 @@ namespace Postcore.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login(LoginModel model)
+        public IActionResult Login()
         {
+            var model = new LoginModel();
             return View(model);
         }
 
@@ -38,7 +39,7 @@ namespace Postcore.Web.Controllers
                 if (result.Succeeded)
                     return RedirectToAction("Index", "Home");
 
-                ModelState.AddModelError("LoginError", "Email and password do not match");
+                ModelState.AddModelError("LoginError", "Invalid email or password.");
             }
 
             return View("Login", model);
@@ -69,22 +70,26 @@ namespace Postcore.Web.Controllers
 
             if (user.Status != null)
             { 
-                ModelState.AddModelError("UserExists", "User already exists");
+                ModelState.AddModelError("SignUpError", "User already exists.");
                 return View(model);
             }
 
             user.Attributes.Add("name", model.Email);
             var createdUser = await _userManager.CreateAsync(user, model.Password).ConfigureAwait(false);
 
-            if (createdUser.Succeeded)
-                return RedirectToAction("Confirm");
+            if (!createdUser.Succeeded)
+            {
+                ModelState.AddModelError("SignUpError", "Unable to create account.");
+                return View(model);
+            }
 
-            return View();
+            return RedirectToAction("Confirm");
         }
 
         [HttpGet]
-        public IActionResult Confirm(ConfirmModel model)
+        public IActionResult Confirm()
         {
+            var model = new ConfirmModel();
             return View(model);
         }
 
@@ -97,18 +102,20 @@ namespace Postcore.Web.Controllers
                 var user = await _userManager.FindByEmailAsync(model.Email).ConfigureAwait(false);
                 if (user == null)
                 {
-                    ModelState.AddModelError("NotFound", "A user with the given email address was not found");
+                    ModelState.AddModelError("ConfirmError", "Email address not found.");
                     return View(model);
                 }
 
                 var result = await ((CognitoUserManager<CognitoUser>)_userManager)
                     .ConfirmSignUpAsync(user, model.Code, true).ConfigureAwait(false);
 
-                if (result.Succeeded) return RedirectToAction("Index", "Home");
+                if (!result.Succeeded)
+                {
+                    ModelState.AddModelError("ConfirmError", "Unable to confirm account.");
+                    return View(model);
+                }
 
-                foreach (var item in result.Errors) ModelState.AddModelError(item.Code, item.Description);
-
-                return View(model);
+                return RedirectToAction("Index", "Home");
             }
 
             return View(model);

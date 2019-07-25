@@ -8,6 +8,9 @@
     <div class="col-md-5">
         <h3 class="mt-5">Sign in</h3>
         <form method="post" asp-controller="Accounts" asp-action="Login">
+
+            @Html.ValidationMessage("LoginError", new { @style="color: #DF691A;"})
+
             <div class="form-group">
                 <label asp-for="Email"></label>
                 <input asp-for="Email" class="form-control" />
@@ -23,7 +26,7 @@
             <div class="form-group">
                 <div class="checkbox">
                     <input asp-for="RememberMe" />
-                    @Html.DisplayName("Remember Me")
+                    @Html.DisplayName("Remember me")
                 </div>
             </div>
 

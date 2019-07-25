@@ -1,10 +1,12 @@
 ﻿using Amazon.XRay.Recorder.Core;
 using Amazon.XRay.Recorder.Handlers.AwsSdk;
 using Amazon.XRay.Recorder.Handlers.System.Net;
+using CodingBlast;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
@@ -75,6 +77,8 @@ namespace Postcore.Web
                     IgnoreLocalhost = true, Permanent = true
                 });
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddSingleton<ITagHelperComponent>(new GoogleAnalyticsTagHelperComponent("UA-117704974-3"));
         }
 
         // 5 retry attemps

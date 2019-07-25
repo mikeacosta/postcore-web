@@ -4,12 +4,12 @@ namespace Postcore.Web.Core.WebModels.Accounts
 {
     public class ConfirmModel
     {
-        [Required(ErrorMessage = "Email is required.")]
-        [Display(Name = "Email")]
+        [Required(ErrorMessage = "Required")]
         [EmailAddress]
+        [Display(Name = "Email")]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = "Code is requred.")]
+        [Required(ErrorMessage = "Required")]
         [Display(Name = "Code")]
         public string Code { get; set; }
     }
