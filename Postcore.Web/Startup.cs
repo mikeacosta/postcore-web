@@ -1,18 +1,18 @@
 ﻿using Amazon.XRay.Recorder.Core;
 using Amazon.XRay.Recorder.Handlers.AwsSdk;
 using Amazon.XRay.Recorder.Handlers.System.Net;
-using CodingBlast;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Extensions.Http;
 using Postcore.Web.Attributes;
 using Postcore.Web.Core.Interfaces;
+using Postcore.Web.Helpers;
 using Postcore.Web.Infrastructure.ApiClients;
 using Postcore.Web.Infrastructure.Mapper;
 using Postcore.Web.Infrastructure.Utilities;
@@ -70,6 +70,9 @@ namespace Postcore.Web
                 .AddPolicyHandler(GetRetryPolicy())
                 .AddPolicyHandler(GetCircuitBreakerPatternPolicy());
 
+            services.Configure<GoogleAnalyticsSettings>(settings => Configuration.GetSection("GoogleAnalytics").Bind(settings));
+            services.AddTransient<ITagHelperComponent, GoogleAnalyticsTagHelperComponent>();
+
             services.AddMvc(options => 
             {
                 options.Filters.Add(new RequireWwwAttribute
@@ -77,8 +80,6 @@ namespace Postcore.Web
                     IgnoreLocalhost = true, Permanent = true
                 });
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
-            services.AddSingleton<ITagHelperComponent>(new GoogleAnalyticsTagHelperComponent("UA-117704974-3"));
         }
 
         // 5 retry attemps
@@ -95,7 +96,7 @@ namespace Postcore.Web
             return HttpPolicyExtensions.HandleTransientHttpError().CircuitBreakerAsync(3, TimeSpan.FromSeconds(30));
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -105,6 +106,8 @@ namespace Postcore.Web
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
+            loggerFactory.AddAWSProvider(Configuration.GetAWSLoggingConfigSection());
 
             app.UseStaticFiles();
             app.UseXRay("Postcore.Web");
