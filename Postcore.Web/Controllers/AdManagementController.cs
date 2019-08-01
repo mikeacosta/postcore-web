@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Postcore.Web.Core.ApiModels;
 using Postcore.Web.Core.Interfaces;
 using Postcore.Web.Core.WebModels.AdManagement;
@@ -16,16 +17,19 @@ namespace Postcore.Web.Controllers
         private readonly IFileUploader _fileUploader;
         private readonly IAdApiClient _client;
         private readonly IMapper _mapper;
+        private readonly ILogger<AdManagementController> _logger;
 
-        public AdManagementController(IFileUploader fileUploader, IAdApiClient client, IMapper mapper)
+        public AdManagementController(IFileUploader fileUploader, IAdApiClient client, IMapper mapper, ILogger<AdManagementController> logger)
         {
             _fileUploader = fileUploader;
             _client = client;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public IActionResult Create(CreateAdViewModel model)
         {
+            _logger.LogInformation(nameof(AdManagementController));
             return View(model);
         }
 
@@ -80,6 +84,8 @@ namespace Postcore.Web.Controllers
                         });
 
                         Console.WriteLine(e.Message);
+                        _logger.LogError($"{nameof(AdManagementController)} : {e.Message}");
+
                     }
                 }
 

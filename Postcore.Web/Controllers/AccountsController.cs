@@ -3,6 +3,7 @@ using Amazon.AspNetCore.Identity.Cognito;
 using Amazon.Extensions.CognitoAuthentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Postcore.Web.Core.WebModels.Accounts;
 
 namespace Postcore.Web.Controllers
@@ -12,17 +13,23 @@ namespace Postcore.Web.Controllers
         private readonly SignInManager<CognitoUser> _signInManager;
         private readonly UserManager<CognitoUser> _userManager;
         private readonly CognitoUserPool _pool;
+        private readonly ILogger<AccountsController> _logger;
 
-        public AccountsController(SignInManager<CognitoUser> signInManager, UserManager<CognitoUser> userManager, CognitoUserPool pool)
+        public AccountsController(SignInManager<CognitoUser> signInManager,
+            UserManager<CognitoUser> userManager,
+            CognitoUserPool pool,
+            ILogger<AccountsController> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _pool = pool;
+            _logger = logger;
         }
 
         [HttpGet]
         public IActionResult Login()
         {
+            _logger.LogInformation($"{nameof(AccountsController)}: Login");
             var model = new LoginModel();
             return View(model);
         }
@@ -35,6 +42,8 @@ namespace Postcore.Web.Controllers
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Email,
                     model.Password, model.RememberMe, false).ConfigureAwait(false);
+
+                _logger.LogInformation($"{nameof(AccountsController)}: Login result: {model.Email} {result.Succeeded}");
 
                 if (result.Succeeded)
                     return RedirectToAction("Index", "Home");

@@ -21,7 +21,7 @@ namespace Postcore.Web.Controllers
 
         public IActionResult Index()
         {
-            _logger.LogInformation("SnsController, dude!");
+            _logger.LogInformation(nameof(SnsController));
             return View();
         }
 
@@ -34,16 +34,28 @@ namespace Postcore.Web.Controllers
                 content = await reader.ReadToEndAsync();
             }
 
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                var msg = $"{nameof(SnsController)}: SNS message is empty";
+                _logger.LogError(msg);
+                return new BadRequestObjectResult(msg);
+            }
+
             var message = Message.ParseMessage(content);
 
             try
             {
                 if (!message.IsSubscriptionType)
-                    return new OkObjectResult("Regular request"); // handle the action
+                {
+                    // TODO: handle message
+                    _logger.LogInformation($"{nameof(SnsController)}: SNS message received: " + message.MessageText);
+                    _logger.LogInformation($"{nameof(SnsController)}: SNS message: " + message.ToString());
+                    return new OkObjectResult("Regular request");
+                }
 
                 var result = await _client.GetStringAsync(message.SubscribeURL);
-                _logger.LogInformation("SNS SubscribeURL: " + message.SubscribeURL);
-                _logger.LogInformation("SNS SubscribeURL: " + result);
+                _logger.LogInformation($"{nameof(SnsController)}: SNS SubscribeURL: " + message.SubscribeURL);
+                _logger.LogInformation($"{nameof(SnsController)}: SNS SubscribeURL: " + result);
                 return new OkObjectResult("Confirmed");
 
             }

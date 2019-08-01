@@ -36,13 +36,6 @@ namespace Postcore.Web
 
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.Configure<CookiePolicyOptions>(options =>
-            //{
-            //    // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-            //    options.CheckConsentNeeded = context => true;
-            //    options.MinimumSameSitePolicy = SameSiteMode.None;
-            //});
-
             services.AddCognitoIdentity(config =>
             {
                 config.Password = new Microsoft.AspNetCore.Identity.PasswordOptions
@@ -96,7 +89,7 @@ namespace Postcore.Web
             return HttpPolicyExtensions.HandleTransientHttpError().CircuitBreakerAsync(3, TimeSpan.FromSeconds(30));
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -106,8 +99,6 @@ namespace Postcore.Web
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-
-            loggerFactory.AddAWSProvider(Configuration.GetAWSLoggingConfigSection());
 
             app.UseStaticFiles();
             app.UseXRay("Postcore.Web");
