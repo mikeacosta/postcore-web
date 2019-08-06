@@ -77,3 +77,5 @@ _[Ss]cripts
 .vs/
 .vscode/
 Postcore.Web/aws-logger-errors.txt
+Postcore.Web.Core/publish/
+Postcore.Web.Infrastructure/publish/

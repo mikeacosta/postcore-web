@@ -19,11 +19,9 @@ namespace Postcore.Web.Infrastructure.Utilities
             _configuration = configuration;
         }
 
-        public async Task<bool> UploadFileAsync(string fileName, Stream storageStream)
+        public async Task<bool> UploadFileAsync(string fileName, Stream storageStream, string bucket)
         {
             if (string.IsNullOrEmpty(fileName)) throw new ArgumentException("File name must be specified.");
-
-            var bucketName = _configuration.GetValue<string>("ImageBucket");
 
             using (var client = new AmazonS3Client(RegionEndpoint.USWest2))
             {
@@ -34,7 +32,7 @@ namespace Postcore.Web.Infrastructure.Utilities
                 var request = new PutObjectRequest
                 {
                     AutoCloseStream = true,
-                    BucketName = bucketName,
+                    BucketName = bucket,
                     InputStream = storageStream,
                     Key = fileName
                 };

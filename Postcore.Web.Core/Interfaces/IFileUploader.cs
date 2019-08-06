@@ -6,6 +6,6 @@ namespace Postcore.Web.Core.Interfaces
 {
     public interface IFileUploader
     {
-        Task<bool> UploadFileAsync(string fileName, Stream storageStream);
+        Task<bool> UploadFileAsync(string fileName, Stream storageStream, string bucket);
     }
 }

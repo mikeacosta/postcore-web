@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Extensions.Http;
 using Postcore.Web.Attributes;
 using Postcore.Web.Core.Interfaces;
 using Postcore.Web.Helpers;
+using Postcore.Web.Hubs;
 using Postcore.Web.Infrastructure.ApiClients;
 using Postcore.Web.Infrastructure.Mapper;
 using Postcore.Web.Infrastructure.Utilities;
@@ -73,6 +73,8 @@ namespace Postcore.Web
                     IgnoreLocalhost = true, Permanent = true
                 });
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddSignalR();
         }
 
         // 5 retry attemps
@@ -104,6 +106,11 @@ namespace Postcore.Web
             app.UseXRay("Postcore.Web");
             app.UseCookiePolicy();
             app.UseAuthentication();
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<SnsHub>("/snsHub");
+            });
 
             app.UseMvc(routes =>
             {
