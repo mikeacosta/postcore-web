@@ -66,6 +66,8 @@ namespace Postcore.Web
             services.Configure<GoogleAnalyticsSettings>(settings => Configuration.GetSection("GoogleAnalytics").Bind(settings));
             services.AddTransient<ITagHelperComponent, GoogleAnalyticsTagHelperComponent>();
 
+            services.AddTransient<ISnsAdapter, SnsAdapter>();
+
             services.AddMvc(options => 
             {
                 options.Filters.Add(new RequireWwwAttribute
@@ -74,7 +76,11 @@ namespace Postcore.Web
                 });
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddSignalR();
+            services.AddSignalR(hubOptions =>
+            {
+                hubOptions.EnableDetailedErrors = true;
+                hubOptions.KeepAliveInterval = TimeSpan.FromMinutes(1);
+            });
         }
 
         // 5 retry attemps

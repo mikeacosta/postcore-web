@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Image Recogniton";
+    ViewData["Title"] = "Image Recognition";
 }
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -24,9 +24,15 @@
     </div>
 </div>
 
+<div id="divProcessing">
+    <p>Processing, please wait . . . <img src="../images/ajax-loader.gif"></p>
+</div>
+
 <script>
 
-    $(function() {
+    $(function () {
+        $("#divProcessing").hide();
+
         $("#imageForm").submit(function(e) {
 
             e.preventDefault();
@@ -38,16 +44,24 @@
             var fileData = new FormData();
             fileData.append('imageFile', file);
 
+            if (file != null) {
+                $("#btnUpload").attr("disabled", true);
+                $("#divProcessing").show();
+            }
+                
             $.ajax({
                 type: 'POST',
                 url: '/sns/index',
                 data: fileData,
                 processData: false,
                 contentType: false
-            }).done(function(result) {
+            }).done(function (result) {
+                window.setTimeout(function () {
+                    $("#btnUpload").removeAttr("disabled");
+                    $("#divProcessing").hide();
+                }, 800);
                 console.log(result);
             });
-
         });
 
     });

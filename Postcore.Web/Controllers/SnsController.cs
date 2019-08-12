@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Amazon.SimpleNotificationService.Util;
@@ -9,9 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using Postcore.Web.Core.Interfaces;
-using Postcore.Web.Core.WebModels;
 using Postcore.Web.Hubs;
 
 namespace Postcore.Web.Controllers
@@ -24,13 +24,15 @@ namespace Postcore.Web.Controllers
         private readonly IHubContext<SnsHub> _hubContext;
         private readonly IFileUploader _fileUploader;
         private readonly IConfiguration _configuration;
+        private readonly ISnsAdapter _snsAdapter;
 
         public SnsController(ILogger<SnsController> logger, 
             IHttpClientFactory clientFactory, 
             IHostingEnvironment env, 
             IHubContext<SnsHub> hubcontext,
             IFileUploader fileUploader,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ISnsAdapter snsAdapter)
         {
             _logger = logger;
             _client = clientFactory.CreateClient();
@@ -38,6 +40,7 @@ namespace Postcore.Web.Controllers
             _hubContext = hubcontext;
             _fileUploader = fileUploader;
             _configuration = configuration;
+            _snsAdapter = snsAdapter;
         }
 
         public IActionResult Index()
@@ -49,7 +52,7 @@ namespace Postcore.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(IFormFile imageFile)
         {
-            if (imageFile != null)
+            if (imageFile != null && IsImage(imageFile.FileName))
             {
                 var id = DateTimeOffset.Now.ToString("yyyyMMddTHHmmss");
                 var bucket = _configuration.GetValue<string>("RekognitionBucket");
@@ -88,48 +91,69 @@ namespace Postcore.Web.Controllers
             if (string.IsNullOrWhiteSpace(content))
                 return new BadRequestObjectResult($"{nameof(SnsController)}: SNS message is empty");
 
-            SnsMessage snsMessage = null;
+            String snsMessage = string.Empty;
             String result = string.Empty;
 
             try
             {
-                if (_env.IsDevelopment())
+                var message = Message.ParseMessage(content);
+
+                if (!message.IsSubscriptionType)
                 {
-                    snsMessage = JsonConvert.DeserializeObject<SnsMessage>(content);
+                    _logger.LogInformation($"{nameof(SnsController)}: SNS message received: " + message.MessageText);
+                    SendSnsMessages(message.MessageText);
+                    result = "Regular request";
                 }
                 else
                 {
-                    var message = Message.ParseMessage(content);
-
-                    if (!message.IsSubscriptionType)
-                    {
-                        _logger.LogInformation($"{nameof(SnsController)}: SNS message received: " + message.MessageText);
-                        snsMessage = JsonConvert.DeserializeObject<SnsMessage>(message.MessageText);
-                        result = "Regular request";
-                    }
-                    else
-                    {
-                        var url = await _client.GetStringAsync(message.SubscribeURL);
-                        _logger.LogInformation($"{nameof(SnsController)}: SNS SubscribeURL: " + url);
-                        result = "Confirmed";
-                    }
+                    var url = await _client.GetStringAsync(message.SubscribeURL);
+                    _logger.LogInformation($"{nameof(SnsController)}: SNS SubscribeURL: " + url);
+                    result = "Confirmed";
                 }
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message);
+                if (e != null)
+                    _logger.LogError($"{nameof(SnsController)} error: {e.Message}");
+
                 return new BadRequestObjectResult(e.ToString());
             }
 
-            if (snsMessage != null)
-            {
-                snsMessage.Body.ForEach(label =>
-                {
-                    _hubContext.Clients.All.SendAsync("ReceiveMessage", label);
-                });
-            }
-
+            _logger.LogInformation($"{nameof(SnsController)} result: {result}");
             return new OkObjectResult(result);
         }
+
+        private void SendSnsMessages(string messages)
+        {
+            _snsAdapter.ToList(messages).ForEach(async label =>
+            {
+                _logger.LogInformation($"{nameof(SnsController)} sending message: {label}");
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", label);
+            });
+        }
+
+        private bool IsImage(string file)
+        {
+            if (string.IsNullOrEmpty(file))
+            {
+                throw new ArgumentNullException(nameof(file));
+            }
+
+            var extension = Path.GetExtension(file);
+            return ImageMimeDictionary.ContainsKey(extension.ToLower());
+        }
+
+        private readonly IDictionary<string, string> ImageMimeDictionary = new Dictionary<string, string>
+        {
+            { ".bmp", "image/bmp" },
+            { ".dib", "image/bmp" },
+            { ".gif", "image/gif" },
+            { ".svg", "image/svg+xml" },
+            { ".jpe", "image/jpeg" },
+            { ".jpeg", "image/jpeg" },
+            { ".jpg", "image/jpeg" },
+            { ".png", "image/png" },
+            { ".pnz", "image/png" }
+        };
     }
 }
