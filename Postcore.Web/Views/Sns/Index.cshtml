@@ -15,7 +15,12 @@
             </div>
             <button type="submit" id="btnUpload" class="btn btn-primary">Upload</button>
 
-            <div>&nbsp</div>
+            <div class="mt-3 mb-3">
+                <small>
+                    After upload, results should appear below (be patient).<br />
+                    If not, <a href="/sns">refresh</a> page and try again.
+                </small>
+            </div>
 
             <div class="row">
                 <ul id="messagesList"></ul>
@@ -24,7 +29,7 @@
     </div>
 </div>
 
-<div id="divProcessing">
+<div id="divProcessing" style="display:none">
     <p>Processing, please wait . . . <img src="../images/ajax-loader.gif"></p>
 </div>
 
@@ -59,7 +64,7 @@
                 window.setTimeout(function () {
                     $("#btnUpload").removeAttr("disabled");
                     $("#divProcessing").hide();
-                }, 800);
+                }, 1200);
                 console.log(result);
             });
         });
