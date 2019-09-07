@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -20,22 +21,26 @@ namespace Postcore.Web.Controllers
         private readonly IMapper _mapper;
         private readonly ILogger<AdManagementController> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _contextAccessor;
 
         public AdManagementController(IFileUploader fileUploader,
             IAdApiClient client,
             IMapper mapper,
             ILogger<AdManagementController> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IHttpContextAccessor contextAccessor)
         {
             _fileUploader = fileUploader;
             _client = client;
             _mapper = mapper;
             _logger = logger;
             _configuration = configuration;
+            _contextAccessor = contextAccessor;
         }
 
         public IActionResult Create(CreateAdViewModel model)
         {
+            ViewBag.Current = "Create";
             _logger.LogInformation(nameof(AdManagementController));
             return View(model);
         }
@@ -51,6 +56,7 @@ namespace Postcore.Web.Controllers
             if (ModelState.IsValid)
             {
                 var ad = _mapper.ToAd(model);
+                ad.Username = GetUsername();
                 var createResponse = await _client.CreateAsync(ad);
                 var id = createResponse.Id;
                 var filePath = string.Empty;
@@ -101,6 +107,12 @@ namespace Postcore.Web.Controllers
             }
 
             return View(model);
+        }
+
+        private string GetUsername()
+        {
+            try { return _contextAccessor.HttpContext.User.FindFirst(ClaimTypes.Email).Value; }
+            catch { return string.Empty; }
         }
     }
 }

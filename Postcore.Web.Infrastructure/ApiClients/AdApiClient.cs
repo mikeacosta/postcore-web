@@ -1,8 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
+using Postcore.AdApi.Shared.Models;
 using Postcore.Web.Core.ApiModels;
 using Postcore.Web.Core.Interfaces;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -21,6 +24,13 @@ namespace Postcore.Web.Infrastructure.ApiClients
             _client = client;
             _baseUrl = configuration.GetSection("AdApi").GetValue<string>("BaseUrl");
             _mapper = mapper;
+        }
+
+        public async Task<List<Ad>> GetAllAsync()
+        {
+            var response = await _client.GetAsync(new Uri($"{_baseUrl}/all")).ConfigureAwait(false);
+            var ads = await response.Content.ReadAsAsync<List<AdDto>>().ConfigureAwait(false);
+            return ads.Select(a => _mapper.ToAd(a)).ToList();
         }
 
         public async Task<CreateResponse> CreateAsync(Ad ad)

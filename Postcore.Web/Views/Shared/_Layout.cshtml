@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Amazon.Extensions.CognitoAuthentication;
+@using Microsoft.AspNetCore.Identity;
+@inject SignInManager<CognitoUser> signInMgr;
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8" />
@@ -29,11 +33,25 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="@(ViewBag.Current == "Home" ? "nav-link text-muted" : "nav-link text-primary")" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        @*<li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>*@
+                        <li class="nav-item">
+                            <a class="@(ViewBag.Current == "Create" ? "nav-link text-muted" : "nav-link text-primary")" asp-area="" asp-controller="AdManagement" asp-action="Create">Post</a>
+                        </li>
+
+                        @if (!signInMgr.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <a class="@(ViewBag.Current == "Login" ? "nav-link text-muted" : "nav-link text-primary")" asp-area="" asp-controller="Accounts" asp-action="Login">Sign in</a>
+                            </li>
+                        }
+
+                        @if (signInMgr.IsSignedIn(User))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-primary" asp-area="" asp-controller="Accounts" asp-action="Logout">Sign out</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -48,7 +66,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2019 - postcore.net @*- <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>*@
+            &copy; 2019 postcore.net | <a class="text-muted" href="http://mike.acosta.net" target="_blank">developer</a>
         </div>
     </footer>
 

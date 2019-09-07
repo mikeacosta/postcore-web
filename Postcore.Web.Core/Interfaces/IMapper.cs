@@ -9,5 +9,6 @@ namespace Postcore.Web.Core.Interfaces
         CreateResponse ToCreateResponse(AdApi.Shared.Models.CreateAdResponseDto response);
         AdApi.Shared.Models.ConfirmAdDto ToConfirmAdDto(ConfirmRequest request);
         Ad ToAd(CreateAdViewModel model);
+        Ad ToAd(AdApi.Shared.Models.AdDto dto);
     }
 }

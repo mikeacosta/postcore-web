@@ -29,6 +29,7 @@ namespace Postcore.Web.Controllers
         [HttpGet]
         public IActionResult Login()
         {
+            ViewBag.Current = "Login";
             _logger.LogInformation($"{nameof(AccountsController)}: Login");
             var model = new LoginModel();
             return View(model);
@@ -64,6 +65,7 @@ namespace Postcore.Web.Controllers
 
         public IActionResult SignUp()
         {
+            ViewBag.Current = "SignUp";
             var model = new SignUpModel();
             return View(model);
         }

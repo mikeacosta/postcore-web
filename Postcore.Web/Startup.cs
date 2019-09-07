@@ -3,6 +3,7 @@ using Amazon.XRay.Recorder.Handlers.AwsSdk;
 using Amazon.XRay.Recorder.Handlers.System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Configuration;
@@ -54,12 +55,18 @@ namespace Postcore.Web
                 options.LoginPath = "/Accounts/Login";
             });
 
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
             services.AddSingleton<IMapper, Mapper>();
             services.AddTransient<IFileUploader, S3FileUploader>();
 
             services.AddTransient<HttpClientXRayTracingHandler>();
             services.AddHttpClient<IAdApiClient, AdApiClient>()
                 .AddHttpMessageHandler<HttpClientXRayTracingHandler>()
+                .AddPolicyHandler(GetRetryPolicy())
+                .AddPolicyHandler(GetCircuitBreakerPatternPolicy());
+
+            services.AddHttpClient<ISearchApiClient, SearchApiClient>()
                 .AddPolicyHandler(GetRetryPolicy())
                 .AddPolicyHandler(GetCircuitBreakerPatternPolicy());
 

@@ -12,11 +12,8 @@ namespace Postcore.Web.Infrastructure.Utilities
 {
     public class S3FileUploader : IFileUploader
     {
-        private readonly IConfiguration _configuration;
-
-        public S3FileUploader(IConfiguration configuration)
+        public S3FileUploader()
         {
-            _configuration = configuration;
         }
 
         public async Task<bool> UploadFileAsync(string fileName, Stream storageStream, string bucket)

@@ -1,4 +1,5 @@
-﻿using Postcore.Web.Core.ApiModels;
+﻿using Postcore.AdApi.Shared.Models;
+using Postcore.Web.Core.ApiModels;
 using Postcore.Web.Core.Interfaces;
 using Postcore.Web.Core.WebModels.AdManagement;
 
@@ -16,6 +17,18 @@ namespace Postcore.Web.Infrastructure.Mapper
             };
         }
 
+        public Ad ToAd(AdDto dto)
+        {
+            return new Ad
+            {
+                Id = dto.Id,
+                Title = dto.Title,
+                Description = dto.Description,
+                Price = dto.Price,
+                Username = dto.Username
+            };
+        }
+
         public AdApi.Shared.Models.AdDto ToAdDto(Ad ad)
         {
             return new AdApi.Shared.Models.AdDto
@@ -23,7 +36,8 @@ namespace Postcore.Web.Infrastructure.Mapper
                 Id = ad.Id,
                 Title = ad.Title,
                 Description = ad.Description,
-                Price = ad.Price
+                Price = ad.Price,
+                Username = ad.Username
             };
         }
 

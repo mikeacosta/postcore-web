@@ -1,14 +1,48 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Mvc.ViewFeatures
+@model IEnumerable<Postcore.Web.Core.WebModels.Home.SearchViewModel>
+
+@{
     ViewData["Title"] = "Home Page";
 }
+    <div class="jumbotron-fluid">
+        <img src="~/images/construction.png" height="96" width="96" /><span class="ml-2 text-muted">Work in progress.  Thanks for visiting.</span>
+    </div>
 
-<div class="jumbotron">
-    <h1 class="display-3">Welcome!</h1>
-    <p class="lead">This site is currently under construction.  It is driven by a distributed system built using .NET Core microservices and utilizes various AWS cloud services.</p>
-    <hr class="my-4">
-    <p>Thanks for visiting.  We hope to unveil the magic soon!</p>
+    <div class="row pt-4 pb-2" id="Search">
+        <div class="col-md-2 col-sm-4 text-left">
+            <span>Search:</span>
+        </div>
+        <div class="col-md-12 col-sm-8 text-left">
+            <form method="post" asp-controller="Home" asp-action="Index">
+                <input type="text"
+                       name="keyword"
+                       id="keyword"
+                       class="form-control float-left"
+                       required
+                       placeholder="Keyword"
+                       style="width: 80%; margin-right: 5px" />&nbsp;
 
-    <p class="mt-4">
-        <a asp-action="Logout" asp-controller="Accounts">Sign out</a>
-    </p>
-</div>
+                <button type="submit" class="btn btn-primary" placeholder="Keyword" required>Search</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row pt-2">
+        <div class="col-md-10">
+            @foreach (var item in Model)
+            {
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-1">
+                            <img src="~/images/search-result.png" style="width: 16px;height: 16px;" />
+                        </div>
+                        <div class="col-sm-11 text-left">
+                            <a class="text-muted" href="#" data-id="@item.Id"> @item.Title</a>
+                            <p class="small text-secondary">@item.Description</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
