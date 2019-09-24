@@ -17,12 +17,13 @@
                 <input type="text"
                        name="keyword"
                        id="keyword"
+                       maxlength="100"
                        class="form-control float-left"
                        required
                        placeholder="Keyword"
-                       style="width: 80%; margin-right: 5px" />&nbsp;
+                       style="width: 40%; margin-right: 5px" />&nbsp;
 
-                <button type="submit" class="btn btn-primary" placeholder="Keyword" required>Search</button>
+                <button type="submit" id="btnSearch" name="btnSearch" class="btn btn-primary" placeholder="Keyword" required>Search</button>
             </form>
         </div>
     </div>
@@ -45,4 +46,28 @@
             }
         </div>
     </div>
-
+@section Scripts
+{
+    <script>
+        $(function () {
+            var getData = function (request, response) {
+                $.getJSON(
+                    "https://6pu95ie7r3.execute-api.us-west-2.amazonaws.com/Prod/search?t=1&q=" + request.term,
+                    function (data) {
+                        response(data);
+                    });
+            };
+ 
+            var selectItem = function (event, ui) {
+                $("#keyword").val(ui.item.value);
+                $("#btnSearch").click();
+            }
+ 
+            $("#keyword").autocomplete({
+                source: getData,
+                select: selectItem,
+                minLength: 2
+            });
+        });
+    </script>
+}
